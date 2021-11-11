@@ -52,6 +52,34 @@ def get_groups():
         return "Couldn't get group names"
 
 
+"""
+Format for group must have name of group, users__{index}__{property}
+{property} is 'id' and must be provided
+
+EXAMPLE:
+    'name': 'The Brain Trust',
+    'group_type': 'trip',
+    'users__0__first_name': 'Alan',
+    'users__0__last_name': 'Turing',
+    'users__0__email': 'alan@example.org',
+    'users__1__id': 5823
+"""
+
+
+def create_group(name, group_type, id):
+    headers = get_headers()
+    data = {
+        "name": name,
+        "group_type": group_type,
+        "users__{index}__{property}": id,
+    }
+    r = requests.post(
+        auth_url + "create_group",
+        headers=headers,
+        data=data,
+    )
+
+
 # print(get_current_user())
 # print(get_another_user(6716973))
 # print(get_groups())

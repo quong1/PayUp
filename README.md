@@ -8,6 +8,4 @@
 
 3. In `.env`, `export API_KEY="<your-api-key-here>"`
 
-4. `python3 splitwise.py` to print out JSON response
-
-5. Feel free to add more api endpoints from `https://dev.splitwise.com/#tag/users`
+4. `python3 splitwise.py` to test the functions

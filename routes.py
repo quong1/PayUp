@@ -46,6 +46,12 @@ def login():
     return render_template("login.html", title="Login", form=form)
 
 
+@login_required
+@app.route("/index", methods=["GET", "POST"])
+def index():
+    pass
+
+
 @app.route("/logout")
 def logout():
     logout_user()
