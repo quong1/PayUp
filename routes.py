@@ -1,7 +1,7 @@
 import os
 import secrets
 from flask import render_template, url_for, flash, redirect, request, Flask, Blueprint
-import db, bcrypt, mail
+from flask_bcrypt import Bcrypt
 from PIL import Image
 from forms import (
     RegistrationForm,
@@ -14,8 +14,10 @@ from models import Userdb, Expensedb, Budgetdb
 from flask_login import login_user, current_user, logout_user, login_required
 from dotenv import load_dotenv, find_dotenv
 from flask_mail import Message
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv(find_dotenv())
+
 
 app = Flask(__name__, static_folder="./build/static")
 # Point SQLAlchemy to your Heroku database
@@ -23,7 +25,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 # Gets rid of a warning
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = b"I am a secret key"
-
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 bp = Blueprint("bp", __name__, template_folder="./build")
 
 
