@@ -16,11 +16,19 @@ class Userdb(db.Model, UserMixin):
         return "<Userdb %r>" % self.username
 
 
-class Artistdb(db.Model):
+class Expensedb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    artistID = db.Column(db.String(120), nullable=False)
+    expense = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
-    artistIDs = db.relationship("Userdb", backref=db.backref("posts", lazy=True))
 
     def __repr__(self):
-        return "<Artistdb %r>" % self.artistID
+        return "<Expensedb %r>" % self.expense
+
+
+class Budgetdb(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    budget = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
+
+    def __repr__(self):
+        return "<Artistdb %r>" % self.budget
