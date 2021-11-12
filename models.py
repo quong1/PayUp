@@ -1,4 +1,5 @@
-import db, login_manager
+from routes import login_manager
+from routes import db
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin
 
