@@ -50,8 +50,4 @@ def get_groups():
             print(group["name"])
     except KeyError:
         return "Couldn't get group names"
-
-
-# print(get_current_user())
-# print(get_another_user(6716973))
-# print(get_groups())
+        
