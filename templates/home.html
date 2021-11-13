@@ -6,7 +6,7 @@
     <div>
         <form method="POST" action="/saveBudget">
             {{ form.hidden_tag() }}
-            <input type="number" step="0.01" name="budget" placeholder="Budget">
+            <input type="number" name="budget" step="0.01" placeholder="Budget">
             <input type="submit" value="Set">
         </form>
     </div>
@@ -42,14 +42,12 @@
         <tr>
             <th>Expense Name</th>
             <th>Price</th>
-            <th>User ID</th>
             <th></th>
         </tr>
         {% for expense in expenses %}
         <tr>
             <td>{{ expense.expense }}</td>
             <td>{{ expense.price }}</td>
-            <td>{{ expense.user_id }}</td>
             <td>
                 <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
                     {{ form.hidden_tag() }}

@@ -153,7 +153,7 @@ class Userdb(db.Model, UserMixin):
 class Expensedb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     expense = db.Column(db.String(120), nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
     def __repr__(self):
@@ -162,13 +162,14 @@ class Expensedb(db.Model):
 
 class Budgetdb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    budget = db.Column(db.Integer, nullable=False)
+    budget = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
     def __repr__(self):
         return "<Artistdb %r>" % self.budget
 
 
+db.drop_all()
 db.create_all()
 login_manager = LoginManager()
 login_manager.login_view = "login"
