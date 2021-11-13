@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+    <br>
+    <h2>Budget</h2>
+    <div>
+        <form method="POST" action="/saveBudget">
+            {{ form.hidden_tag() }}
+            <input type="number" step="0.01" name="budget" placeholder="Budget">
+            <input type="submit" value="Add">
+        </form>
+    </div>
+    <table class="table">
+        <tr>
+            <th>Budget</th>
+            <th>Used</th>
+            <th>Remaining</th>
+        </tr>
+        <tr>
+            <td>{{ budget.budget }}</td>
+            <td>{{ used }}</td>
+            <td>{{ budget.budget - used }}</td>
+        </tr>
+    </table>
+
+    <br>
+    <h2>Expenses</h2>
+    <div>
+        <form method="POST" action="/saveExpense">
+            {{ form.hidden_tag() }}
+            <input type="text" name="expense" placeholder="Expense">
+            <input type="number" name="price" step="0.01" placeholder="Price">
+            <input type="submit" value="Add">
+        </form>
+    </div>
+
+    <table class="table">
+        <tr>
+            <th>Expense Name</th>
+            <th>Price</th>
+            <th>User ID</th>
+            <th></th>
+        </tr>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.expense }}</td>
+            <td>{{ expense.price }}</td>
+            <td>{{ expense.user_id }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
+                    {{ form.hidden_tag() }}
+                    <input type="submit" value="Delete">
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock content %}
