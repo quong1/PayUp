@@ -7,7 +7,7 @@
         <form method="POST" action="/saveBudget">
             {{ form.hidden_tag() }}
             <input type="number" step="0.01" name="budget" placeholder="Budget">
-            <input type="submit" value="Add">
+            <input type="submit" value="Set">
         </form>
     </div>
     <table class="table">
@@ -19,7 +19,11 @@
         <tr>
             <td>{{ budget.budget }}</td>
             <td>{{ used }}</td>
-            <td>{{ budget.budget - used }}</td>
+            {% if budget.budget %}
+            <td>
+                {{ budget.budget - used }}
+            </td>
+            {% endif %}
         </tr>
     </table>
 
@@ -56,4 +60,5 @@
         {% endfor %}
     </table>
 </div>
+<a href="{{ url_for('logout') }}">Log out</a>
 {% endblock content %}

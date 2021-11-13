@@ -344,7 +344,6 @@ def home():
 def save_budget():
     form = BudgetForm()
     user_id = current_user.id
-    print(form.errors)
     if form.validate_on_submit():
         budget = flask.request.form.get("budget")
         db.session.add(Budgetdb(budget=budget, user_id=user_id))
@@ -357,12 +356,9 @@ def save_budget():
 def save_expense():
     form = ExpensesForm()
     user_id = current_user.id
-    print(form.errors)
     if form.validate_on_submit():
         expense = flask.request.form.get("expense")
-
         price = flask.request.form.get("price")
-
         db.session.add(Expensedb(expense=expense, price=price, user_id=user_id))
         db.session.commit()
         return redirect(url_for("home"))
