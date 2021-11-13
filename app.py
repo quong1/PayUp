@@ -169,7 +169,6 @@ class Budgetdb(db.Model):
         return "<Artistdb %r>" % self.budget
 
 
-db.drop_all()
 db.create_all()
 login_manager = LoginManager()
 login_manager.login_view = "login"
