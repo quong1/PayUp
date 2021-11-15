@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="content-section">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     <br>
     <h2>Budget</h2>
     <div>
@@ -17,12 +26,12 @@
             <th>Remaining</th>
         </tr>
         <tr>
+            {% if budget %}
             <td>{{ budget.budget }}</td>
+            {% endif %}
             <td>{{ used }}</td>
-            {% if budget.budget %}
-            <td>
-                {{ budget.budget - used }}
-            </td>
+            {% if budget %}
+            <td>{{ budget.budget - used }}</td>
             {% endif %}
         </tr>
     </table>

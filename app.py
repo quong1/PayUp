@@ -162,7 +162,7 @@ class Expensedb(db.Model):
 
 class Budgetdb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    budget = db.Column(db.Float, nullable=False)
+    budget = db.Column(db.Float, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
     def __repr__(self):
