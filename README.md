@@ -8,4 +8,5 @@
 
 3. In `.env`, `export API_KEY="<your-api-key-here>"`
 
+
 4. `python3 splitwise.py` to test the functions

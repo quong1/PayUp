@@ -1,71 +1,81 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="content-section">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class=flashes>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-    <br>
-    <h2>Budget</h2>
-    <div>
-        <form method="POST" action="/saveBudget">
-            {{ form.hidden_tag() }}
-            <input type="number" name="budget" step="0.01" placeholder="Budget">
-            <input type="submit" value="Set">
-        </form>
-    </div>
-    <table class="table">
-        <tr>
-            <th>Budget</th>
-            <th>Used</th>
-            <th>Remaining</th>
-        </tr>
-        <tr>
-            {% if budget %}
-            <td>{{ budget.budget }}</td>
-            {% endif %}
-            <td>{{ used }}</td>
-            {% if budget %}
-            <td>{{ budget.budget - used }}</td>
-            {% endif %}
-        </tr>
-    </table>
 
-    <br>
-    <h2>Expenses</h2>
-    <div>
-        <form method="POST" action="/saveExpense">
-            {{ form.hidden_tag() }}
-            <input type="text" name="expense" placeholder="Expense">
-            <input type="number" name="price" step="0.01" placeholder="Price">
-            <input type="submit" value="Add">
-        </form>
-    </div>
+<body style="background-color:honeydew; padding-top: 20px;">
+    <div class="content-section">
+        <br>
+        <h2><u>Budget</u></h2>
+        <div>
+            <form method="POST" action="/saveBudget">
+                {{ form.hidden_tag() }}
+                <input type="number" name="budget" step="0.01" placeholder="Budget">
+                <input type="submit" value="Set">
+            </form>
+        </div>
+        <table class="table">
+            <tr>
+                <th><span style="color:green">Budget($)</span></th>
+                <th><span style="color:red">Used($)</span></th>
+                <th>Remaining($)</th>
+            </tr>
+            <tr>
+                <td style="color :green">{{ budget.budget }}</td>
+                <td style="color:red">{{ used }}</td>
+                {% if budget %}
+                <td>{{ budget.budget }}</td>
+                {% endif %}
+                <td>{{ used }}</td>
+                {% if budget %}
+                <td>{{ budget.budget - used }}</td>
+                {% endif %}
+            </tr>
+        </table>
 
-    <table class="table">
-        <tr>
-            <th>Expense Name</th>
-            <th>Price</th>
-            <th></th>
-        </tr>
-        {% for expense in expenses %}
-        <tr>
-            <td>{{ expense.expense }}</td>
-            <td>{{ expense.price }}</td>
-            <td>
-                <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
-                    {{ form.hidden_tag() }}
-                    <input type="submit" value="Delete">
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+        <br>
+        <h2><u>Expenses</u></h2>
+        <div>
+            <form method="POST" action="/saveExpense">
+                {{ form.hidden_tag() }}
+                <input type="text" name="expense" placeholder="Expense">
+                <input type="number" name="price" step="0.01" placeholder="Price">
+                <input type="submit" value="Add">
+            </form>
+        </div>
+        <style type="text/css">
+            tr:nth-of-type(2n) {
+                border: 1px solid black;
+                background-color: rgba(150, 150, 150, 0.5);
+
+            }
+
+            td {
+                padding: 8px 8px;
+                border: 1px solid black;
+            }
+        </style>
+        <details open>
+            <summary style="font-size: 20px;">Details</summary>
+            <table class="table">
+                <tr>
+                    <th>Expense Name</th>
+                    <th>Price($)</th>
+                    <th></th>
+                </tr>
+                {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.expense }}</td>
+                    <td>{{ expense.price }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
+                            {{ form.hidden_tag() }}
+                            <input type="submit" value="Delete">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </details>
+    </div>
+</body>
 <a href="{{ url_for('logout') }}">Log out</a>
 {% endblock content %}

@@ -50,3 +50,4 @@ def get_groups():
             print(group["name"])
     except KeyError:
         return "Couldn't get group names"
+
