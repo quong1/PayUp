@@ -1,13 +1,22 @@
-from routes import login_manager
-from routes import db
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin
 
+load_dotenv(find_dotenv())
+from flask_sqlalchemy import SQLAlchemy
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Userdb.query.get(int(user_id))
+app = Flask(__name__, static_folder="./build/static")
+# Point SQLAlchemy to your Heroku database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+# Gets rid of a warning
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.secret_key = b"I am a secret key"
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+bp = Blueprint("bp", __name__, template_folder="./build")
 
+login_manager = LoginManager()
+login_manager.login_view = "login"
+login_manager.init_app(app)
 
 class Userdb(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)

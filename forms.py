@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from models import Userdb
+from models import *
 
 
 class RegistrationForm(FlaskForm):
@@ -35,6 +35,12 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     remember = BooleanField("Remember Me")
     submit = SubmitField("Login")
+
+
+class ExpensesForm(FlaskForm):
+    expense = StringField("Expense", validators=[DataRequired()])
+    price = StringField("Price", validaters=[DataRequired()])
+    add = SubmitField("Add")
 
 
 class UpdateAccountForm(FlaskForm):
