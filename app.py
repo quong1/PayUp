@@ -1,7 +1,16 @@
 import os
 import flask
 import secrets
-from flask import render_template, url_for, flash, redirect, request, Flask, Blueprint
+from flask import (
+    render_template,
+    url_for,
+    flash,
+    redirect,
+    request,
+    Flask,
+    Blueprint,
+    session,
+)
 from flask_bcrypt import Bcrypt
 from PIL import Image
 
@@ -182,23 +191,36 @@ class Budgetdb(db.Model):
     def __repr__(self):
         return "<Artistdb %r>" % self.budget
 
+@app.route("/")
+def main():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
-    user_id = current_user.id
-    form = ExpensesForm()
-    expenses = Expensedb.query.all()
-    used = sum(map(lambda x: x.price, expenses))
-    budget = Budgetdb.query.order_by(Budgetdb.id.desc()).first()
-    return render_template(
-        "home.html",
-        expenses=expenses,
-        budget=budget,
-        used=used,
-        form=form,
-        user_id=user_id,
-    )
+    username = current_user.username
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        form = ExpensesForm()
+        expenses = Expensedb.query.filter_by(user_id=user_id).all()
+        used = sum(map(lambda x: x.price, expenses))
+        budget = (
+            Budgetdb.query.order_by(Budgetdb.id.desc())
+            .filter_by(user_id=user_id)
+            .first()
+        )
+        return render_template(
+            "home.html",
+            expenses=expenses,
+            budget=budget,
+            used=used,
+            form=form,
+            user_id=user_id,
+        )
+    else:
+        return redirect(url_for("login"))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -239,6 +261,7 @@ def login():
 @app.route("/logout")
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for("login"))
 
 
@@ -326,15 +349,6 @@ def reset_token(token):
         return redirect(url_for("login"))
     return render_template("reset_token.html", title="Reset Password", form=form)
 
-
-@app.route("/")
-def main():
-
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
-    return redirect(url_for("login"))
-
-
 @app.route("/saveBudget", methods=["POST"])
 def save_budget():
     form = BudgetForm()
@@ -359,16 +373,15 @@ def save_expense():
         return redirect(url_for("home"))
     return render_template("home.html", form=form)
 
-
 @app.route("/delete/<expense_id>", methods=["POST"])
 def delete(expense_id):
     Expensedb.query.filter_by(id=expense_id).delete()
     db.session.commit()
     return redirect(url_for("home"))
 
-
 if __name__ == "__main__":
     app.run(
         host=os.getenv("IP", "0.0.0.0"),
         port=int(os.getenv("PORT", "8081")),
+        debug=True,
     )

@@ -19,12 +19,10 @@
                 <th>Remaining($)</th>
             </tr>
             <tr>
-                <td style="color :green">{{ budget.budget }}</td>
-                <td style="color:red">{{ used }}</td>
                 {% if budget %}
-                <td>{{ budget.budget }}</td>
+                <td style="color :green">{{ budget.budget }}</td>
                 {% endif %}
-                <td>{{ used }}</td>
+                <td style="color:red">{{ used }}</td>
                 {% if budget %}
                 <td>{{ budget.budget - used }}</td>
                 {% endif %}
@@ -63,8 +61,10 @@
                 </tr>
                 {% for expense in expenses %}
                 <tr>
+                    {% if expense %}
                     <td>{{ expense.expense }}</td>
                     <td>{{ expense.price }}</td>
+                    {% endif %}
                     <td>
                         <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
                             {{ form.hidden_tag() }}
