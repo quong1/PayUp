@@ -351,8 +351,7 @@ def save_budget():
         budget = flask.request.form.get("budget")
         db.session.add(Budgetdb(budget=budget, user_id=user_id))
         db.session.commit()
-        return redirect(url_for("home"))
-    return render_template("home.html", form=form)
+    return redirect(url_for("home"))
 
 
 @app.route("/saveExpense", methods=["POST"])
@@ -364,8 +363,7 @@ def save_expense():
         price = flask.request.form.get("price")
         db.session.add(Expensedb(expense=expense, price=price, user_id=user_id))
         db.session.commit()
-        return redirect(url_for("home"))
-    return render_template("home.html", form=form)
+    return redirect(url_for("home"))
 
 
 @app.route("/delete/<expense_id>", methods=["POST"])
