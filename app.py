@@ -10,6 +10,7 @@ from flask import (
     Flask,
     Blueprint,
     session,
+    flash,
 )
 from flask_bcrypt import Bcrypt
 from PIL import Image
@@ -52,7 +53,6 @@ login_manager.init_app(app)
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
-    username = current_user.username
     if current_user.is_authenticated:
         user_id = current_user.id
         form = ExpensesForm()
@@ -296,13 +296,22 @@ class ResetPasswordForm(FlaskForm):
 
 
 class ExpensesForm(FlaskForm):
-    expense = StringField("Expense", validators=[DataRequired()])
-    price = DecimalField("Price", validators=[DataRequired()])
+    expense = StringField(
+        "Expense",
+        validators=[DataRequired(), Length(min=1, message="Please input an expense")],
+    )
+    price = DecimalField(
+        "Price",
+        validators=[DataRequired()],
+    )
     submit = SubmitField("Add")
 
 
 class BudgetForm(FlaskForm):
-    budget = DecimalField("Budget", validators=[DataRequired()])
+    budget = DecimalField(
+        "Budget",
+        validators=[DataRequired()],
+    )
     submit = SubmitField("Add")
 
 
@@ -342,7 +351,7 @@ class Expensedb(db.Model):
 
 class Budgetdb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    budget = db.Column(db.Integer, nullable=False)
+    budget = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
     def __repr__(self):
@@ -357,8 +366,7 @@ def save_budget():
         budget = flask.request.form.get("budget")
         db.session.add(Budgetdb(budget=budget, user_id=user_id))
         db.session.commit()
-        return redirect(url_for("home"))
-    return render_template("home.html", form=form)
+    return redirect(url_for("home"))
 
 
 @app.route("/saveExpense", methods=["POST"])
@@ -370,8 +378,7 @@ def save_expense():
         price = flask.request.form.get("price")
         db.session.add(Expensedb(expense=expense, price=price, user_id=user_id))
         db.session.commit()
-        return redirect(url_for("home"))
-    return render_template("home.html", form=form)
+    return redirect(url_for("home"))
 
 
 @app.route("/delete/<expense_id>", methods=["POST"])
@@ -388,5 +395,4 @@ if __name__ == "__main__":
     app.run(
         host=os.getenv("IP", "0.0.0.0"),
         port=int(os.getenv("PORT", "8081")),
-        debug=True,
     )
