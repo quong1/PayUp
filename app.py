@@ -191,17 +191,12 @@ class Budgetdb(db.Model):
     def __repr__(self):
         return "<Artistdb %r>" % self.budget
 
-@app.route("/")
-def main():
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
-    return redirect(url_for("login"))
 
+@app.route("/")
 @app.route("/home", methods=["GET", "POST"])
-@login_required
 def home():
-    username = current_user.username
     if current_user.is_authenticated:
+        username = current_user.username
         user_id = current_user.id
         form = ExpensesForm()
         expenses = Expensedb.query.filter_by(user_id=user_id).all()
@@ -261,7 +256,6 @@ def login():
 @app.route("/logout")
 def logout():
     logout_user()
-    session.clear()
     return redirect(url_for("login"))
 
 
@@ -349,6 +343,7 @@ def reset_token(token):
         return redirect(url_for("login"))
     return render_template("reset_token.html", title="Reset Password", form=form)
 
+
 @app.route("/saveBudget", methods=["POST"])
 def save_budget():
     form = BudgetForm()
@@ -357,7 +352,8 @@ def save_budget():
         budget = flask.request.form.get("budget")
         db.session.add(Budgetdb(budget=budget, user_id=user_id))
         db.session.commit()
-    return redirect(url_for("home"))
+        return redirect(url_for("home"))
+    return render_template("home.html", form=form)
 
 
 @app.route("/saveExpense", methods=["POST"])
@@ -369,7 +365,9 @@ def save_expense():
         price = flask.request.form.get("price")
         db.session.add(Expensedb(expense=expense, price=price, user_id=user_id))
         db.session.commit()
-    return redirect(url_for("home"))
+        return redirect(url_for("home"))
+    return render_template("home.html", form=form)
+
 
 @app.route("/delete/<expense_id>", methods=["POST"])
 def delete(expense_id):
@@ -377,8 +375,10 @@ def delete(expense_id):
     db.session.commit()
     return redirect(url_for("home"))
 
+
 if __name__ == "__main__":
     app.run(
         host=os.getenv("IP", "0.0.0.0"),
         port=int(os.getenv("PORT", "8081")),
+        debug=True,
     )
