@@ -8,8 +8,6 @@ from flask import (
     redirect,
     request,
     Flask,
-    Blueprint,
-    session,
 )
 from flask_bcrypt import Bcrypt
 from PIL import Image
@@ -208,6 +206,7 @@ def home():
         )
         return render_template(
             "home.html",
+            username = username,
             expenses=expenses,
             budget=budget,
             used=used,
