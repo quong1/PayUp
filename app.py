@@ -1,7 +1,16 @@
 import os
 import flask
 import secrets
-from flask import render_template, url_for, flash, redirect, request, Flask, Blueprint
+from flask import (
+    render_template,
+    url_for,
+    flash,
+    redirect,
+    request,
+    Flask,
+    Blueprint,
+    session,
+)
 from flask_bcrypt import Bcrypt
 from PIL import Image
 
@@ -43,19 +52,22 @@ login_manager.init_app(app)
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
-    user_id = current_user.id
-    form = ExpensesForm()
-    expenses = Expensedb.query.all()
-    used = sum(map(lambda x: x.price, expenses))
-    budget = Budgetdb.query.order_by(Budgetdb.id.desc()).first()
-    return render_template(
-        "home.html",
-        expenses=expenses,
-        budget=budget,
-        used=used,
-        form=form,
-        user_id=user_id,
-    )
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        form = ExpensesForm()
+        expenses = Expensedb.query.all()
+        used = sum(map(lambda x: x.price, expenses))
+        budget = Budgetdb.query.order_by(Budgetdb.id.desc()).first()
+        return render_template(
+            "home.html",
+            expenses=expenses,
+            budget=budget,
+            used=used,
+            form=form,
+            user_id=user_id,
+        )
+    else:
+        return redirect(url_for("login"))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -96,7 +108,8 @@ def login():
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for("home"))
+    session.clear()
+    return redirect(url_for("login"))
 
 
 def save_picture(form_picture):
@@ -145,6 +158,7 @@ def send_reset_email(user):
 If you did not make this request then simply ignore this email and no changes will be made.
 """
     mail.send(msg)
+    pass
 
 
 @app.route("/reset_password", methods=["GET", "POST"])
@@ -184,7 +198,6 @@ def reset_token(token):
 
 @app.route("/")
 def main():
-
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     return redirect(url_for("login"))
@@ -329,7 +342,7 @@ class Budgetdb(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
     def __repr__(self):
-        return "<Artistdb %r>" % self.budget
+        return "<Budgetdb %r>" % self.budget
 
 
 @app.route("/saveBudget", methods=["POST"])
@@ -371,4 +384,5 @@ if __name__ == "__main__":
     app.run(
         host=os.getenv("IP", "0.0.0.0"),
         port=int(os.getenv("PORT", "8081")),
+        debug=True,
     )
