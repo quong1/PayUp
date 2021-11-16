@@ -1,7 +1,16 @@
 import os
 import flask
 import secrets
-from flask import render_template, url_for, flash, redirect, request, Flask, Blueprint
+from flask import (
+    render_template,
+    url_for,
+    flash,
+    redirect,
+    request,
+    Flask,
+    Blueprint,
+    session,
+)
 from flask_bcrypt import Bcrypt
 from PIL import Image
 
@@ -10,7 +19,14 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, Decim
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flask_wtf.file import FileField, FileAllowed
 
-from flask_login import login_user, current_user, logout_user, login_required, LoginManager, UserMixin
+from flask_login import (
+    login_user,
+    current_user,
+    logout_user,
+    login_required,
+    LoginManager,
+    UserMixin,
+)
 from dotenv import load_dotenv, find_dotenv
 from flask_mail import Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -37,19 +53,22 @@ login_manager.init_app(app)
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
-    user_id = current_user.id
-    form = ExpensesForm()
-    expenses = Expensedb.query.all()
-    used = sum(map(lambda x: x.price, expenses))
-    budget = Budgetdb.query.order_by(Budgetdb.id.desc()).first()
-    return render_template(
-        "home.html",
-        expenses=expenses,
-        budget=budget,
-        used=used,
-        form=form,
-        user_id=user_id,
-    )
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        form = ExpensesForm()
+        expenses = Expensedb.query.all()
+        used = sum(map(lambda x: x.price, expenses))
+        budget = Budgetdb.query.order_by(Budgetdb.id.desc()).first()
+        return render_template(
+            "home.html",
+            expenses=expenses,
+            budget=budget,
+            used=used,
+            form=form,
+            user_id=user_id,
+        )
+    else:
+        return redirect(url_for("login"))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -62,9 +81,7 @@ def register():
             "utf-8"
         )
         user = Userdb(
-            username=form.username.data,
-            email=form.email.data,
-            password=hashed_password
+            username=form.username.data, email=form.email.data, password=hashed_password
         )
         db.session.add(user)
         db.session.commit()
@@ -92,7 +109,8 @@ def login():
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for("home"))
+    session.clear()
+    return redirect(url_for("login"))
 
 
 def save_picture(form_picture):
@@ -141,6 +159,7 @@ def send_reset_email(user):
 If you did not make this request then simply ignore this email and no changes will be made.
 """
     mail.send(msg)
+    pass
 
 
 @app.route("/reset_password", methods=["GET", "POST"])
@@ -180,9 +199,8 @@ def reset_token(token):
 
 @app.route("/")
 def main():
-
     if current_user.is_authenticated:
-        return redirect(url_for("bp.index"))
+        return redirect(url_for("home"))
     return redirect(url_for("login"))
 
 
@@ -325,7 +343,7 @@ class Budgetdb(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
     def __repr__(self):
-        return "<Artistdb %r>" % self.budget
+        return "<Budgetdb %r>" % self.budget
 
 
 @app.route("/saveBudget", methods=["POST"])
@@ -360,7 +378,6 @@ def delete(expense_id):
     return redirect(url_for("home"))
 
 
-# db.drop_all()
 db.create_all()
 
 
@@ -368,4 +385,5 @@ if __name__ == "__main__":
     app.run(
         host=os.getenv("IP", "0.0.0.0"),
         port=int(os.getenv("PORT", "8081")),
+        debug=True,
     )

@@ -19,12 +19,10 @@
                 <th>Remaining($)</th>
             </tr>
             <tr>
-                <td style="color :green">{{ budget.budget }}</td>
-                <td style="color:red">{{ used }}</td>
                 {% if budget %}
-                <td>{{ budget.budget }}</td>
+                <td style="color :green">{{ budget.budget }}</td>
                 {% endif %}
-                <td>{{ used }}</td>
+                <td style="color:red">{{ used }}</td>
                 {% if budget %}
                 <td>{{ budget.budget - used }}</td>
                 {% endif %}
