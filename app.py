@@ -10,7 +10,14 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, Decim
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flask_wtf.file import FileField, FileAllowed
 
-from flask_login import login_user, current_user, logout_user, login_required, LoginManager, UserMixin
+from flask_login import (
+    login_user,
+    current_user,
+    logout_user,
+    login_required,
+    LoginManager,
+    UserMixin,
+)
 from dotenv import load_dotenv, find_dotenv
 from flask_mail import Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -19,7 +26,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv(find_dotenv())
 
-app = Flask(__name__, static_folder="./build/static")
+app = Flask(__name__, static_folder="./static")
 # Point SQLAlchemy to your Heroku database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 # Gets rid of a warning
@@ -27,7 +34,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = b"I am a secret key"
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-bp = Blueprint("bp", __name__, template_folder="./build")
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
@@ -62,9 +68,7 @@ def register():
             "utf-8"
         )
         user = Userdb(
-            username=form.username.data,
-            email=form.email.data,
-            password=hashed_password
+            username=form.username.data, email=form.email.data, password=hashed_password
         )
         db.session.add(user)
         db.session.commit()
@@ -182,7 +186,7 @@ def reset_token(token):
 def main():
 
     if current_user.is_authenticated:
-        return redirect(url_for("bp.index"))
+        return redirect(url_for("home"))
     return redirect(url_for("login"))
 
 
@@ -289,7 +293,7 @@ class Userdb(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default="default.jpg")
+    image_file = db.Column(db.String(20), nullable=False, default="default.png")
     password = db.Column(db.String(60), nullable=False)
 
     # def get_reset_token(self, expires_sec=1800):
@@ -360,7 +364,6 @@ def delete(expense_id):
     return redirect(url_for("home"))
 
 
-# db.drop_all()
 db.create_all()
 
 
