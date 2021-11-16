@@ -52,12 +52,17 @@ login_manager.init_app(app)
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
+    username = current_user.username
     if current_user.is_authenticated:
         user_id = current_user.id
         form = ExpensesForm()
-        expenses = Expensedb.query.all()
+        expenses = Expensedb.query.filter_by(username=username).all()
         used = sum(map(lambda x: x.price, expenses))
-        budget = Budgetdb.query.order_by(Budgetdb.id.desc()).first()
+        budget = (
+            Budgetdb.query.order_by(Budgetdb.id.desc())
+            .filter_by(username=username)
+            .first()
+        )
         return render_template(
             "home.html",
             expenses=expenses,
@@ -158,7 +163,6 @@ def send_reset_email(user):
 If you did not make this request then simply ignore this email and no changes will be made.
 """
     mail.send(msg)
-    pass
 
 
 @app.route("/reset_password", methods=["GET", "POST"])
@@ -328,6 +332,7 @@ class Userdb(db.Model, UserMixin):
 
 class Expensedb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     expense = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
@@ -338,6 +343,7 @@ class Expensedb(db.Model):
 
 class Budgetdb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     budget = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
 
@@ -349,9 +355,10 @@ class Budgetdb(db.Model):
 def save_budget():
     form = BudgetForm()
     user_id = current_user.id
+    username = current_user.username
     if form.validate_on_submit():
         budget = flask.request.form.get("budget")
-        db.session.add(Budgetdb(budget=budget, user_id=user_id))
+        db.session.add(Budgetdb(budget=budget, user_id=user_id, username=username))
         db.session.commit()
         return redirect(url_for("home"))
     return render_template("home.html", form=form)
@@ -361,10 +368,11 @@ def save_budget():
 def save_expense():
     form = ExpensesForm()
     user_id = current_user.id
+    username = current_user.username
     if form.validate_on_submit():
         expense = flask.request.form.get("expense")
         price = flask.request.form.get("price")
-        db.session.add(Expensedb(expense=expense, price=price, user_id=user_id))
+        db.session.add(Expensedb(expense=expense, price=price, user_id=user_id, username=username))
         db.session.commit()
         return redirect(url_for("home"))
     return render_template("home.html", form=form)
