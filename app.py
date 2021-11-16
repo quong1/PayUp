@@ -10,7 +10,6 @@ from flask import (
     Flask,
     Blueprint,
     session,
-    flash,
 )
 from flask_bcrypt import Bcrypt
 from PIL import Image
@@ -19,6 +18,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flask_wtf.file import FileField, FileAllowed
+from flask_mail import Mail, Message
 
 from flask_login import (
     login_user,
@@ -29,7 +29,6 @@ from flask_login import (
     UserMixin,
 )
 from dotenv import load_dotenv, find_dotenv
-from flask_mail import Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from flask_sqlalchemy import SQLAlchemy
@@ -41,18 +40,167 @@ app = Flask(__name__, static_folder="./static")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 # Gets rid of a warning
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.secret_key = b"I am a secret key"
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 
 login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
+app.config["MAIL_SERVER"] = "smtp.googlemail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.getenv("EMAIL_USER")
+app.config["MAIL_PASSWORD"] = os.getenv("EMAIL_PASSWD")
+mail = Mail(app)
 
+
+@login_manager.user_loader
+def load_user(username):
+    return Userdb.query.get(username)
+
+
+class RegistrationForm(FlaskForm):
+    username = StringField(
+        "Username", validators=[DataRequired(), Length(min=2, max=20)]
+    )
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField(
+        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField("Sign Up")
+
+    def validate_username(self, username):
+        user = Userdb.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError(
+                "That username is taken. Please choose a different one."
+            )
+
+    def validate_email(self, email):
+        user = Userdb.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError("That email is taken. Please choose a different one.")
+
+
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    remember = BooleanField("Remember Me")
+    submit = SubmitField("Login")
+
+
+class UpdateAccountForm(FlaskForm):
+    username = StringField(
+        "Username", validators=[DataRequired(), Length(min=2, max=20)]
+    )
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    picture = FileField(
+        "Update Profile Picture", validators=[FileAllowed(["jpg", "png"])]
+    )
+    submit = SubmitField("Update")
+
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = Userdb.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError(
+                    "That username is taken. Please choose a different one."
+                )
+
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = Userdb.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError(
+                    "That email is taken. Please choose a different one."
+                )
+
+
+class RequestResetForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Request Password Reset")
+
+    def validate_email(self, email):
+        user = Userdb.query.filter_by(email=email.data).first()
+        if user is None:
+            raise ValidationError(
+                "There is no account with that email. You must register first."
+            )
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField(
+        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField("Reset Password")
+
+
+class ExpensesForm(FlaskForm):
+    expense = StringField("Expense", validators=[DataRequired()])
+    price = DecimalField("Price", validators=[DataRequired()])
+    submit = SubmitField("Add")
+
+
+class BudgetForm(FlaskForm):
+    budget = DecimalField("Budget", validators=[DataRequired()])
+    submit = SubmitField("Add")
+
+
+class Userdb(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default="default.png")
+    password = db.Column(db.String(60), nullable=False)
+
+    def get_reset_token(self, expires_sec=3600):
+        s = Serializer(app.config["SECRET_KEY"], expires_sec)
+        return s.dumps({"user_id": self.id}).decode("utf-8")
+
+    @staticmethod
+    def verify_reset_token(token):
+        s = Serializer(app.config["SECRET_KEY"])
+        try:
+            user_id = s.loads(token)["user_id"]
+        except:
+            return None
+        return Userdb.query.get(user_id)
+
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
+
+
+class Expensedb(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    expense = db.Column(db.String, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
+
+    def __repr__(self):
+        return "<Expensedb %r>" % self.expense
+
+
+class Budgetdb(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    budget = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
+
+    def __repr__(self):
+        return "<Artistdb %r>" % self.budget
+
+@app.route("/")
+def main():
+    if current_user.is_authenticated:
+        return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def home():
+    username = current_user.username
     if current_user.is_authenticated:
         user_id = current_user.id
         form = ExpensesForm()
@@ -156,11 +304,13 @@ def account():
 def send_reset_email(user):
     token = user.get_reset_token()
     msg = Message(
-        "Password Reset Request", sender="noreply@demo.com", recipients=[user.email]
+        "Password Reset Request",
+        sender="payupnoreply@gmail.com",
+        recipients=[user.email],
     )
-    msg.body = f"""To reset your password, visit the following link:
+    msg.body = f"""You have requested to reset your password, visit the following link:
 {url_for('reset_token', token=token, _external=True)}
-If you did not make this request then simply ignore this email and no changes will be made.
+If it is not you, please ignore this email!
 """
     mail.send(msg)
 
@@ -199,165 +349,6 @@ def reset_token(token):
         return redirect(url_for("login"))
     return render_template("reset_token.html", title="Reset Password", form=form)
 
-
-@app.route("/")
-def main():
-    if current_user.is_authenticated:
-        return redirect(url_for("home"))
-    return redirect(url_for("login"))
-
-
-@login_manager.user_loader
-def load_user(username):
-    return Userdb.query.get(username)
-
-
-class RegistrationForm(FlaskForm):
-    username = StringField(
-        "Username", validators=[DataRequired(), Length(min=2, max=20)]
-    )
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    confirm_password = PasswordField(
-        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
-    )
-    submit = SubmitField("Sign Up")
-
-    # noinspection PyMethodMayBeStatic
-    def validate_username(self, username):
-        user = Userdb.query.filter_by(username=username.data).first()
-        if user:
-            raise ValidationError(
-                "That username is taken. Please choose a different one."
-            )
-
-    # noinspection PyMethodMayBeStatic
-    def validate_email(self, email):
-        user = Userdb.query.filter_by(email=email.data).first()
-        if user:
-            raise ValidationError("That email is taken. Please choose a different one.")
-
-
-class LoginForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    remember = BooleanField("Remember Me")
-    submit = SubmitField("Login")
-
-
-class UpdateAccountForm(FlaskForm):
-    username = StringField(
-        "Username", validators=[DataRequired(), Length(min=2, max=20)]
-    )
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    picture = FileField(
-        "Update Profile Picture", validators=[FileAllowed(["jpg", "png"])]
-    )
-    submit = SubmitField("Update")
-
-    # noinspection PyMethodMayBeStatic
-    def validate_username(self, username):
-        if username.data != current_user.username:
-            user = Userdb.query.filter_by(username=username.data).first()
-            if user:
-                raise ValidationError(
-                    "That username is taken. Please choose a different one."
-                )
-
-    # noinspection PyMethodMayBeStatic
-    def validate_email(self, email):
-        if email.data != current_user.email:
-            user = Userdb.query.filter_by(email=email.data).first()
-            if user:
-                raise ValidationError(
-                    "That email is taken. Please choose a different one."
-                )
-
-
-class RequestResetForm(FlaskForm):
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    submit = SubmitField("Request Password Reset")
-
-    # noinspection PyMethodMayBeStatic
-    def validate_email(self, email):
-        user = Userdb.query.filter_by(email=email.data).first()
-        if user is None:
-            raise ValidationError(
-                "There is no account with that email. You must register first."
-            )
-
-
-class ResetPasswordForm(FlaskForm):
-    password = PasswordField("Password", validators=[DataRequired()])
-    confirm_password = PasswordField(
-        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
-    )
-    submit = SubmitField("Reset Password")
-
-
-class ExpensesForm(FlaskForm):
-    expense = StringField(
-        "Expense",
-        validators=[DataRequired(), Length(min=1, message="Please input an expense")],
-    )
-    price = DecimalField(
-        "Price",
-        validators=[DataRequired()],
-    )
-    submit = SubmitField("Add")
-
-
-class BudgetForm(FlaskForm):
-    budget = DecimalField(
-        "Budget",
-        validators=[DataRequired()],
-    )
-    submit = SubmitField("Add")
-
-
-class Userdb(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(120), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default="default.png")
-    password = db.Column(db.String(60), nullable=False)
-
-    # def get_reset_token(self, expires_sec=1800):
-    #     s = Serializer(app.config["SECRET_KEY"], expires_sec)
-    #     return s.dumps({"user_id": self.id}).decode("utf-8")
-    #
-    # @staticmethod
-    # def verify_reset_token(token):
-    #     s = Serializer(app.config["SECRET_KEY"])
-    #     try:
-    #         user_id = s.loads(token)["user_id"]
-    #     except:
-    #         return None
-    #     return Userdb.query.get(user_id)
-
-    def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
-
-
-class Expensedb(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    expense = db.Column(db.String, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
-
-    def __repr__(self):
-        return "<Expensedb %r>" % self.expense
-
-
-class Budgetdb(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    budget = db.Column(db.Float, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
-
-    def __repr__(self):
-        return "<Budgetdb %r>" % self.budget
-
-
 @app.route("/saveBudget", methods=["POST"])
 def save_budget():
     form = BudgetForm()
@@ -380,16 +371,11 @@ def save_expense():
         db.session.commit()
     return redirect(url_for("home"))
 
-
 @app.route("/delete/<expense_id>", methods=["POST"])
 def delete(expense_id):
     Expensedb.query.filter_by(id=expense_id).delete()
     db.session.commit()
     return redirect(url_for("home"))
-
-
-db.create_all()
-
 
 if __name__ == "__main__":
     app.run(
