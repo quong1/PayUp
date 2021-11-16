@@ -15,9 +15,9 @@ from dotenv import load_dotenv, find_dotenv
 from flask_mail import Message
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
-load_dotenv(find_dotenv())
 from flask_sqlalchemy import SQLAlchemy
 
+load_dotenv(find_dotenv())
 
 app = Flask(__name__, static_folder="./build/static")
 # Point SQLAlchemy to your Heroku database
@@ -202,6 +202,7 @@ class RegistrationForm(FlaskForm):
     )
     submit = SubmitField("Sign Up")
 
+    # noinspection PyMethodMayBeStatic
     def validate_username(self, username):
         user = Userdb.query.filter_by(username=username.data).first()
         if user:
@@ -209,6 +210,7 @@ class RegistrationForm(FlaskForm):
                 "That username is taken. Please choose a different one."
             )
 
+    # noinspection PyMethodMayBeStatic
     def validate_email(self, email):
         user = Userdb.query.filter_by(email=email.data).first()
         if user:
@@ -232,6 +234,7 @@ class UpdateAccountForm(FlaskForm):
     )
     submit = SubmitField("Update")
 
+    # noinspection PyMethodMayBeStatic
     def validate_username(self, username):
         if username.data != current_user.username:
             user = Userdb.query.filter_by(username=username.data).first()
@@ -240,6 +243,7 @@ class UpdateAccountForm(FlaskForm):
                     "That username is taken. Please choose a different one."
                 )
 
+    # noinspection PyMethodMayBeStatic
     def validate_email(self, email):
         if email.data != current_user.email:
             user = Userdb.query.filter_by(email=email.data).first()
@@ -253,6 +257,7 @@ class RequestResetForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     submit = SubmitField("Request Password Reset")
 
+    # noinspection PyMethodMayBeStatic
     def validate_email(self, email):
         user = Userdb.query.filter_by(email=email.data).first()
         if user is None:

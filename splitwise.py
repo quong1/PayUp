@@ -27,10 +27,10 @@ def get_current_user():
 
 
 # Only returns a first name based on user's ID
-def get_another_user(id):
+def get_another_user(user_id):
     headers = get_headers()
     r = requests.get(
-        auth_url + "get_user/{id}".format(id=id),
+        auth_url + "get_user/{id}".format(id=user_id),
         headers=headers,
     )
     r_json = r.json()
@@ -50,4 +50,3 @@ def get_groups():
             print(group["name"])
     except KeyError:
         return "Couldn't get group names"
-

@@ -1,26 +1,18 @@
+from routes import login_manager
+from routes import db
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask_login import UserMixin
 
-load_dotenv(find_dotenv())
-from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__, static_folder="./build/static")
-# Point SQLAlchemy to your Heroku database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-# Gets rid of a warning
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.secret_key = b"I am a secret key"
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-bp = Blueprint("bp", __name__, template_folder="./build")
+@login_manager.user_loader
+def load_user(user_id):
+    return Userdb.query.get(int(user_id))
 
-login_manager = LoginManager()
-login_manager.login_view = "login"
-login_manager.init_app(app)
 
 class Userdb(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default="default.jpg")
     password = db.Column(db.String(60), nullable=False)
 
@@ -33,7 +25,7 @@ class Userdb(db.Model, UserMixin):
         s = Serializer(app.config["SECRET_KEY"])
         try:
             user_id = s.loads(token)["user_id"]
-        except:
+        except ValueError:
             return None
         return Userdb.query.get(user_id)
 
