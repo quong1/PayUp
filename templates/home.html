@@ -60,14 +60,14 @@
             <table class="table">
                 <tr>
                     <th>Expense Name</th>
-                    <th>Price($)</th>
+                    <th>Price</th>
                     <th></th>
                 </tr>
                 {% for expense in expenses %}
                 <tr>
                     {% if expense %}
                     <td>{{ expense.expense }}</td>
-                    <td>{{ expense.price }}</td>
+                    <td>${{ expense.price }}</td>
                     {% endif %}
                     <td>
                         <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
