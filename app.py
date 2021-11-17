@@ -1,6 +1,11 @@
+# pylint: disable=missing-docstring
+# pylint: disable=invalid-name
+# pylint: disable=no-member
+# pylint: disable=too-few-public-methods
+# pylint: disable=no-self-use
 import os
-import flask
 import secrets
+import flask
 from flask import (
     render_template,
     url_for,
@@ -13,9 +18,9 @@ from flask_bcrypt import Bcrypt
 from PIL import Image
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from flask_wtf.file import FileField, FileAllowed
 from flask_mail import Mail, Message
 
 from flask_login import (
@@ -163,7 +168,7 @@ class Userdb(db.Model, UserMixin):
         s = Serializer(app.config["SECRET_KEY"])
         try:
             user_id = s.loads(token)["user_id"]
-        except:
+        except:  # pylint: disable=bare-except
             return None
         return Userdb.query.get(user_id)
 
@@ -206,15 +211,14 @@ def home():
         )
         return render_template(
             "home.html",
-            username = username,
+            username=username,
             expenses=expenses,
             budget=budget,
             used=used,
             form=form,
             user_id=user_id,
         )
-    else:
-        return redirect(url_for("login"))
+    return redirect(url_for("login"))
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -243,6 +247,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = Userdb.query.filter_by(email=form.email.data).first()
+        # pylint: disable=no-else-return
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get("next")
@@ -276,12 +281,13 @@ def save_picture(form_picture):
 @login_required
 def account():
     form = UpdateAccountForm()
+    # pylint: disable=no-else-return
     if form.validate_on_submit():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
-            current_user.image_file = picture_file
-        current_user.username = form.username.data
-        current_user.email = form.email.data
+            current_user.image_file = picture_file  # pylint: disable=assigning-non-slot
+        current_user.username = form.username.data  # pylint: disable=assigning-non-slot
+        current_user.email = form.email.data  # pylint: disable=assigning-non-slot
         db.session.commit()
         flash("Your account has been updated!", "success")
         return redirect(url_for("account"))
@@ -351,8 +357,7 @@ def save_budget():
         budget = flask.request.form.get("budget")
         db.session.add(Budgetdb(budget=budget, user_id=user_id))
         db.session.commit()
-        return redirect(url_for("home"))
-    return render_template("home.html", form=form)
+    return redirect(url_for("home"))
 
 
 @app.route("/saveExpense", methods=["POST"])
@@ -364,8 +369,7 @@ def save_expense():
         price = flask.request.form.get("price")
         db.session.add(Expensedb(expense=expense, price=price, user_id=user_id))
         db.session.commit()
-        return redirect(url_for("home"))
-    return render_template("home.html", form=form)
+    return redirect(url_for("home"))
 
 
 @app.route("/delete/<expense_id>", methods=["POST"])
