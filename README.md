@@ -1,11 +1,12 @@
 # PayUp
+
+**Deployment:** Try it with heroku [here](http://payup-sprint-1.herokuapp.com/login)
+
 ## Introduction
 Signup to track your expenses. Login anytime to add or remove your budget and expenses.
 
 ![image](https://user-images.githubusercontent.com/74800828/142094143-343f18f8-d71e-43a2-9ba4-b259351ad6b6.png)
 ![image](https://user-images.githubusercontent.com/74800828/142093551-70f251dd-642b-4372-9fd9-fac53db957b4.png)
-
-**Deployment:** Try it with heroku [here](http://payup-sprint-1.herokuapp.com/login)
 
 ## Setup Instruction
 - To run the project clone it into local directory create a ```.env``` file containing below mentioned parameters
