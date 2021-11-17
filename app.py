@@ -1,4 +1,6 @@
-# pylint: disable=missing-docstring
+"""
+PayUp
+"""
 # pylint: disable=invalid-name
 # pylint: disable=no-member
 # pylint: disable=too-few-public-methods
@@ -60,10 +62,13 @@ mail = Mail(app)
 
 @login_manager.user_loader
 def load_user(username):
+    """Get the current user username"""
     return Userdb.query.get(username)
 
 
 class RegistrationForm(FlaskForm):
+    """Form for user to SignUp"""
+
     username = StringField(
         "Username", validators=[DataRequired(), Length(min=2, max=20)]
     )
@@ -75,6 +80,10 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField("Sign Up")
 
     def validate_username(self, username):
+        """
+        Check if username match with any username in the database.
+        If so, prompt user to choose a different one
+        """
         user = Userdb.query.filter_by(username=username.data).first()
         if user:
             raise ValidationError(
@@ -82,12 +91,18 @@ class RegistrationForm(FlaskForm):
             )
 
     def validate_email(self, email):
+        """
+        Check if email match with any email in the database.
+        If so, prompt user to choose a different one
+        """
         user = Userdb.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError("That email is taken. Please choose a different one.")
 
 
 class LoginForm(FlaskForm):
+    """Form for user to Login"""
+
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
     remember = BooleanField("Remember Me")
@@ -95,6 +110,8 @@ class LoginForm(FlaskForm):
 
 
 class UpdateAccountForm(FlaskForm):
+    """Form where user can customize and update their account"""
+
     username = StringField(
         "Username", validators=[DataRequired(), Length(min=2, max=20)]
     )
@@ -105,6 +122,10 @@ class UpdateAccountForm(FlaskForm):
     submit = SubmitField("Update")
 
     def validate_username(self, username):
+        """
+        Check if username match with any username in the database.
+        If so, prompt user to choose a different one
+        """
         if username.data != current_user.username:
             user = Userdb.query.filter_by(username=username.data).first()
             if user:
@@ -113,6 +134,10 @@ class UpdateAccountForm(FlaskForm):
                 )
 
     def validate_email(self, email):
+        """
+        Check if email match with any email in the database.
+        If so, prompt user to choose a different one
+        """
         if email.data != current_user.email:
             user = Userdb.query.filter_by(email=email.data).first()
             if user:
@@ -122,10 +147,16 @@ class UpdateAccountForm(FlaskForm):
 
 
 class RequestResetForm(FlaskForm):
+    """Form for user to request password reset"""
+
     email = StringField("Email", validators=[DataRequired(), Email()])
     submit = SubmitField("Request Password Reset")
 
     def validate_email(self, email):
+        """
+        Check if email is in the database.
+        If not, prompt user to register
+        """
         user = Userdb.query.filter_by(email=email.data).first()
         if user is None:
             raise ValidationError(
@@ -134,6 +165,8 @@ class RequestResetForm(FlaskForm):
 
 
 class ResetPasswordForm(FlaskForm):
+    """Form for user to change and verify the password"""
+
     password = PasswordField("Password", validators=[DataRequired()])
     confirm_password = PasswordField(
         "Confirm Password", validators=[DataRequired(), EqualTo("password")]
@@ -141,18 +174,24 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField("Reset Password")
 
 
+class BudgetForm(FlaskForm):
+    """Form for the user to add the budget"""
+
+    budget = DecimalField("Budget", validators=[DataRequired()])
+    submit = SubmitField("Add")
+
+
 class ExpensesForm(FlaskForm):
+    """Form for user to add the expenses and price"""
+
     expense = StringField("Expense", validators=[DataRequired()])
     price = DecimalField("Price", validators=[DataRequired()])
     submit = SubmitField("Add")
 
 
-class BudgetForm(FlaskForm):
-    budget = DecimalField("Budget", validators=[DataRequired()])
-    submit = SubmitField("Add")
-
-
 class Userdb(db.Model, UserMixin):
+    """Set up User database table"""
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -160,11 +199,16 @@ class Userdb(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
 
     def get_reset_token(self, expires_sec=3600):
+        """Generate a reset token for 1 hour"""
         s = Serializer(app.config["SECRET_KEY"], expires_sec)
         return s.dumps({"user_id": self.id}).decode("utf-8")
 
     @staticmethod
     def verify_reset_token(token):
+        """
+        Check if token is appropriate.
+        Inappropriate token will not reset the password
+        """
         s = Serializer(app.config["SECRET_KEY"])
         try:
             user_id = s.loads(token)["user_id"]
@@ -177,6 +221,10 @@ class Userdb(db.Model, UserMixin):
 
 
 class Expensedb(db.Model):
+    """
+    Set up database for expenses based on user
+    """
+
     id = db.Column(db.Integer, primary_key=True)
     expense = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
@@ -187,6 +235,10 @@ class Expensedb(db.Model):
 
 
 class Budgetdb(db.Model):
+    """
+    Set up database for Budget based on user
+    """
+
     id = db.Column(db.Integer, primary_key=True)
     budget = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("userdb.id"), nullable=False)
@@ -198,6 +250,12 @@ class Budgetdb(db.Model):
 @app.route("/")
 @app.route("/home", methods=["GET", "POST"])
 def home():
+    """
+    Check if current user is aunthenticated.
+    If so, get user budget and expenses from database.
+    Render it to home.html.
+    If not, redirect user to login page
+    """
     if current_user.is_authenticated:
         username = current_user.username
         user_id = current_user.id
@@ -223,6 +281,13 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """
+    If current user is authenticated, redirect to home page
+    If user's input valid on the registration form,
+    add username, email, and password to the database.
+    redirect user to login page to login again.
+    If user is not authenticated, redirect to register page
+    """
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     form = RegistrationForm()
@@ -242,6 +307,12 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """
+    If current user is authenticated, redirect to home page.
+    From user input, check database for existing email and password.
+    If valid, redirect to home page.
+    If not, prompt user to login again
+    """
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     form = LoginForm()
@@ -259,11 +330,17 @@ def login():
 
 @app.route("/logout")
 def logout():
+    """
+    Log user out and redirect to login page
+    """
     logout_user()
     return redirect(url_for("login"))
 
 
 def save_picture(form_picture):
+    """
+    Let user save the changed picture
+    """
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
@@ -280,6 +357,9 @@ def save_picture(form_picture):
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
+    """
+    Let user update the account and save it
+    """
     form = UpdateAccountForm()
     # pylint: disable=no-else-return
     if form.validate_on_submit():
@@ -301,6 +381,9 @@ def account():
 
 
 def send_reset_email(user):
+    """
+    Send user link to reset password
+    """
     token = user.get_reset_token()
     msg = Message(
         "Password Reset Request",
@@ -316,6 +399,9 @@ If it is not you, please ignore this email!
 
 @app.route("/reset_password", methods=["GET", "POST"])
 def reset_request():
+    """
+    Form for user to reset password
+    """
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     form = RequestResetForm()
@@ -331,6 +417,9 @@ def reset_request():
 
 @app.route("/reset_password/<token>", methods=["GET", "POST"])
 def reset_token(token):
+    """
+    Check if token is valid for user to reset password
+    """
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     user = Userdb.verify_reset_token(token)
@@ -351,6 +440,12 @@ def reset_token(token):
 
 @app.route("/saveBudget", methods=["POST"])
 def save_budget():
+    """
+    Get user input from budget form.
+    If user's input is valid,
+    Add the input and store it to the user's budget database.
+    Refresh the page.
+    """
     form = BudgetForm()
     user_id = current_user.id
     if form.validate_on_submit():
@@ -362,6 +457,12 @@ def save_budget():
 
 @app.route("/saveExpense", methods=["POST"])
 def save_expense():
+    """
+    Get user input from expenses form.
+    If user's input is valid,
+    Add the input and store it to the user's expenses database.
+    Refresh the page.
+    """
     form = ExpensesForm()
     user_id = current_user.id
     if form.validate_on_submit():
@@ -374,6 +475,9 @@ def save_expense():
 
 @app.route("/delete/<expense_id>", methods=["POST"])
 def delete(expense_id):
+    """
+    Let user delete expenses
+    """
     Expensedb.query.filter_by(id=expense_id).delete()
     db.session.commit()
     return redirect(url_for("home"))
