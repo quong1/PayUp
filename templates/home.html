@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+</script>
 
 <body style="background-color:honeydew; padding-top: 20px;">
     <div class="content-section">
@@ -55,9 +57,13 @@
                 border: 1px solid black;
             }
         </style>
+
+        <b>Search the table for Expense or Price:
+            <input id="searchh" type="text" placeholder="Search here">
+        </b>
         <details open>
             <summary style="font-size: 20px;">Details</summary>
-            <table class="table">
+            <table id="table1" class="table1">
                 <tr>
                     <th>Expense Name</th>
                     <th>Price</th>
@@ -78,6 +84,17 @@
                 </tr>
                 {% endfor %}
             </table>
+            <script>
+                $(document).ready(function () {
+                    $("#searchh").on("keyup", function () {
+                        var value = $(this).val().toLowerCase();
+                        $("#table1 tr").filter(function () {
+                            $(this).toggle($(this).text()
+                                .toLowerCase().indexOf(value) > -1)
+                        });
+                    });
+                });
+            </script>
         </details>
     </div>
 </body>
