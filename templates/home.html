@@ -17,7 +17,7 @@
             </form>
             <form method="POST" action="{{ url_for('reset_budget') }}">
                 {{ form.hidden_tag() }}
-                <input type="submit" value="Reset">
+                <input type="submit" class="form" value="Reset">
             </form>
         </div>
 
@@ -53,18 +53,22 @@
             </form>
             <form method="POST" action="{{ url_for('delete_all') }}">
                 {{ form.hidden_tag() }}
-                <input type="submit" value="Delete All">
+                <input type="submit" class="form" value="Delete All">
             </form>
         </div>
         <style type="text/css">
             tr:nth-of-type(2n) {
-                border: 1px solid black;
+                border: solid black;
                 background-color: rgba(150, 150, 150, 0.5);
             }
 
             td {
                 padding: 8px 8px;
-                border: 1px solid black;
+                border: solid black;
+            }
+
+            form {
+                padding: 3px 3px;
             }
         </style>
         <details open>
