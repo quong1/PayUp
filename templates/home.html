@@ -66,6 +66,7 @@
                 <tr>
                     <th>Expense Name</th>
                     <th>Price</th>
+                    <th>Remove</th>
                 </tr>
                 {% for expense in expenses %}
                 <tr>
@@ -82,7 +83,7 @@
                 </tr>
                 {% endfor %}
             </table>
-            <button id="export">Save expense to .csv</button>
+            <input type='button' name='export' value='Download CSV' />
             <script>
                 $(document).ready(function () {
                     $("#searchh").on("keyup", function () {
@@ -96,44 +97,44 @@
             </script>
         </details>
         <script type="text/javascript">
-            const toCsv = function (table) {
-                // Query all rows
-                const rows = table.querySelectorAll('tr');
+            document.addEventListener('DOMContentLoaded', () => {
 
-                return [].slice
-                    .call(rows)
-                    .map(function (row) {
-                        // Query all cells
-                        const cells = row.querySelectorAll('th,td');
-                        return [].slice
-                            .call(cells)
-                            .map(function (cell) {
-                                return cell.textContent;
-                            })
-                            .join(',');
-                    })
-                    .join('\n');
-            };
-
-            const download = function (text, fileName) {
-                const link = document.createElement('a');
-                link.setAttribute('href', `data:text/csv;charset=utf-8,${encodeURIComponent(text)}`);
-                link.setAttribute('download', fileName);
-
-                link.style.display = 'none';
-                document.body.appendChild(link);
-
-                link.click();
-
-                document.body.removeChild(link);
-            };
-
-            const table = document.getElementById('table1');
-            const exportBtn = document.getElementById('export');
-
-            exportBtn.addEventListener('click', function () {
-                const csv = toCsv(table);
-                download(csv, 'Expenses.csv');
+                const preparetext = function (text, regex, rep) {
+                    text = text.replace(/(\r\n|\n|\r)/gm, '');
+                    text = text.replace(/(\s\s)/gm, ' ');
+                    text = text.replace(/"/g, '""');
+                    return text;
+                };
+                document.querySelector('input[type="button"][name="export"]').addEventListener('click', e => {
+                    let table = document.querySelector('table#table1');
+                    let colHeaders = table.querySelectorAll('tr th');
+                    let colRows = table.querySelectorAll('tr:not( .headers )');
+                    let index = -1;
+                    let exclude = 'Remove';
+                    let headers = [];
+                    let data = [];
+                    colHeaders.forEach((th, i) => {
+                        if (th.textContent != exclude) headers.push(['"', preparetext(th.textContent), '"'].join(''))
+                        else index = i;
+                    });
+                    data.push(headers.join(','));
+                    data.push(String.fromCharCode(10));
+                    if (index > -1) {
+                        colRows.forEach(tr => {
+                            let cells = tr.querySelectorAll('td');
+                            let row = [];
+                            cells.forEach((td, i) => {
+                                if (i !== index) row.push(['"', preparetext(td.textContent), '"'].join(''))
+                            });
+                            data.push(row.join(','));
+                            data.push(String.fromCharCode(10));
+                        });
+                        let a = document.createElement('a');
+                        a.download = 'Expense.csv';
+                        a.href = URL.createObjectURL(new Blob(data));
+                        a.click();
+                    }
+                })
             });
         </script>
     </div>
