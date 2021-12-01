@@ -46,7 +46,7 @@ app = Flask(__name__, static_folder="./static")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 # Gets rid of a warning
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = True
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = 20
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
