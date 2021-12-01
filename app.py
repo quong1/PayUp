@@ -258,10 +258,10 @@ def home():
     Render it to home.html.
     If not, redirect user to login page
     """
+    db.create_all()
     if current_user.is_authenticated:
         username = current_user.username
         user_id = current_user.id
-        db.create_all()
         form = ExpensesForm()
         expenses = Expensedb.query.filter_by(user_id=user_id).all()
         used = sum(map(lambda x: x.price, expenses))
