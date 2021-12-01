@@ -488,8 +488,22 @@ def delete(expense_id):
 
 @app.route("/delete_all", methods=["POST"])
 def delete_all():
+    """
+    Allows user to delete all expenses
+    """
     engine = create_engine(os.getenv("DATABASE_URL"))
     Expensedb.__table__.drop(engine)
+    db.session.commit()
+    return redirect(url_for("home"))
+
+
+@app.route("/reset_budget", methods=["POST"])
+def reset_budget():
+    """
+    Allows user to reset budget value
+    """
+    engine = create_engine(os.getenv("DATABASE_URL"))
+    Budgetdb.__table__.drop(engine)
     db.session.commit()
     return redirect(url_for("home"))
 
