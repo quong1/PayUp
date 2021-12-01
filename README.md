@@ -1,6 +1,6 @@
 # PayUp
 
-**Deployment:** Try it with heroku [here](http://payup-sprint-1.herokuapp.com/login)
+**Deployment:** Try it with heroku [here](http://payup-sprint-2.herokuapp.com/login)
 
 ## Introduction
 Signup to track your expenses. Login anytime to add or remove your budget and expenses.
