@@ -7,15 +7,16 @@
     <div class="content-section">
         <br>
         <h2><u>{{ username }}'s Budget</u></h2>
-        <div>
+        <div class="reset">
             <form method="POST" action="/saveBudget">
                 {{ form.hidden_tag() }}
                 <div class="dollar">
-                    <input type="number" name="budget" step="0.01" required>
+                    <input type="number" name="budget" step="0.01" placeholder="Budget" required>
                 </div>
                 <input type="submit" value="Set">
             </form>
         </div>
+
         <table class="table">
             <tr>
                 <th><span style="color:green">Budget</span></th>
@@ -24,11 +25,11 @@
             </tr>
             <tr>
                 {% if budget %}
-                <td style="color :green">${{ budget.budget }}</td>
+                <td style="color :green">{{ "%.2f"|format(budget.budget) }}</td>
                 {% endif %}
-                <td style="color:red">${{ used }}</td>
+                <td style="color:red">{{ "%.2f"|format(used) }}</td>
                 {% if budget %}
-                <td>${{ budget.budget - used }}</td>
+                <td>{{ "%.2f"|format(budget.budget - used) }}</td>
                 {% endif %}
             </tr>
         </table>
@@ -40,9 +41,13 @@
                 {{ form.hidden_tag() }}
                 <input type="text" name="expense" placeholder="Expense" required>
                 <div class="dollar">
-                    <input type="number" name="price" step="0.01" required>
+                    <input type="number" name="price" step="0.01" placeholder="Price" required>
                 </div>
                 <input type="submit" value="Add">
+            </form>
+            <form method="POST" action="{{ url_for('delete_all') }}">
+                {{ form.hidden_tag() }}
+                <input type="submit" value="Delete All">
             </form>
         </div>
         <style type="text/css">
@@ -71,7 +76,7 @@
                 <tr>
                     {% if expense %}
                     <td>{{ expense.expense }}</td>
-                    <td>${{ expense.price }}</td>
+                    <td>{{ "%.2f"|format(expense.price) }}</td>
                     {% endif %}
                     <td>
                         <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
