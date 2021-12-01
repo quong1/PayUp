@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+</script>
 
 <body style="background-color:honeydew; padding-top: 20px;">
     <div class="content-section">
@@ -57,11 +59,14 @@
         </style>
         <details open>
             <summary style="font-size: 20px;">Details</summary>
-            <table class="table">
+            <table id="table1" class="table">
+                <b>Search the table for Expense or Price:
+                    <input id="searchh" type="text" placeholder="Search here">
+                </b><br>
                 <tr>
                     <th>Expense Name</th>
                     <th>Price</th>
-                    <th></th>
+                    <th>Remove</th>
                 </tr>
                 {% for expense in expenses %}
                 <tr>
@@ -78,7 +83,60 @@
                 </tr>
                 {% endfor %}
             </table>
+            <input type='button' name='export' value='Download CSV' />
+            <script>
+                $(document).ready(function () {
+                    $("#searchh").on("keyup", function () {
+                        var value = $(this).val().toLowerCase();
+                        $("#table1 tr").filter(function () {
+                            $(this).toggle($(this).text()
+                                .toLowerCase().indexOf(value) > -1)
+                        });
+                    });
+                });
+            </script>
         </details>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', () => {
+
+                const preparetext = function (text, regex, rep) {
+                    text = text.replace(/(\r\n|\n|\r)/gm, '');
+                    text = text.replace(/(\s\s)/gm, ' ');
+                    text = text.replace(/"/g, '""');
+                    return text;
+                };
+                document.querySelector('input[type="button"][name="export"]').addEventListener('click', e => {
+                    let table = document.querySelector('table#table1');
+                    let colHeaders = table.querySelectorAll('tr th');
+                    let colRows = table.querySelectorAll('tr:not( .headers )');
+                    let index = -1;
+                    let exclude = 'Remove';
+                    let headers = [];
+                    let data = [];
+                    colHeaders.forEach((th, i) => {
+                        if (th.textContent != exclude) headers.push(['"', preparetext(th.textContent), '"'].join(''))
+                        else index = i;
+                    });
+                    data.push(headers.join(','));
+                    data.push(String.fromCharCode(10));
+                    if (index > -1) {
+                        colRows.forEach(tr => {
+                            let cells = tr.querySelectorAll('td');
+                            let row = [];
+                            cells.forEach((td, i) => {
+                                if (i !== index) row.push(['"', preparetext(td.textContent), '"'].join(''))
+                            });
+                            data.push(row.join(','));
+                            data.push(String.fromCharCode(10));
+                        });
+                        let a = document.createElement('a');
+                        a.download = 'Expense.csv';
+                        a.href = URL.createObjectURL(new Blob(data));
+                        a.click();
+                    }
+                })
+            });
+        </script>
     </div>
 </body>
 {% endblock content %}
