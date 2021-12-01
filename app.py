@@ -30,6 +30,7 @@ from dotenv import load_dotenv, find_dotenv
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
 
 load_dotenv(find_dotenv())
 
@@ -38,6 +39,7 @@ app = Flask(__name__, static_folder="./static")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 # Gets rid of a warning
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = True
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -196,6 +198,7 @@ def home():
     if current_user.is_authenticated:
         username = current_user.username
         user_id = current_user.id
+        db.create_all()
         form = ExpensesForm()
         expenses = Expensedb.query.filter_by(user_id=user_id).all()
         used = sum(map(lambda x: x.price, expenses))
@@ -206,7 +209,7 @@ def home():
         )
         return render_template(
             "home.html",
-            username = username,
+            username=username,
             expenses=expenses,
             budget=budget,
             used=used,
@@ -369,6 +372,14 @@ def save_expense():
 @app.route("/delete/<expense_id>", methods=["POST"])
 def delete(expense_id):
     Expensedb.query.filter_by(id=expense_id).delete()
+    db.session.commit()
+    return redirect(url_for("home"))
+
+
+@app.route("/delete_all", methods=["POST"])
+def delete_all():
+    engine = create_engine(os.getenv("DATABASE_URL"))
+    Expensedb.__table__.drop(engine)
     db.session.commit()
     return redirect(url_for("home"))
 
