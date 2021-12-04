@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% block content %}
+<title>About PayUp</title>
+
+<body>
+    <div class="section">
+        <div class="title">
+            <h1>About Us</h1>
+        </div>
+        <div class="container">
+            <div class="content-section">
+                <h3>Our Goal</h3>
+                <p>PayUp is an easy to access budgetting web app</p>
+                <div class="col-md-4 px-0">
+                    <img src="{{ payup_image }}" class="img-fluid">
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="content-section">
+                <h3>Personal finances made easy</h3>
+                <p>Manage your expense and track your spending habits </p>
+                <div class="col-md-4 px-0">
+                    <img src="{{ table_image }}" class="img-fluid">
+                </div>
+            </div>
+        </div>
+        <div class="container"></div>
+        <div class="content-section">
+            <h3>Fan of excel calculations?</h3>
+            <p> Download your expenses and transactions through csv file to explore more possibilites</p>
+            <div class="col-md-4 px-0">
+                <img src="{{ csv_image }}" class="img-fluid">
+            </div>
+        </div>
+        <a href="{{ url_for('home') }}">Try it now &#8594; </a>
+
+    </div>
+
+    <div class="py-5 PayUp">
+        <div class="container">
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-7 text-center">
+                    <h3 class="mb-3">Our Team</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 mb-4 center">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="{{M_image}}" alt="wrapkit" class="img-fluid rounded-circle" />
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <div class="pt-2">
+                                <h5 class="mt-4 font-weight-medium mb-0">Michael Uong</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 mb-4 center">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="{{Z_image}}" alt="wrapkit" class="img-fluid rounded-circle" />
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <div class="pt-2">
+                                <h5 class="mt-4 font-weight-medium mb-0">Zi Yon</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 mb-4 center">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="{{J_image}}" alt="wrapkit" class="img-fluid rounded-circle" />
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <div class="pt-2">
+                                <h5 class="mt-4 font-weight-medium mb-0">Jason Rosmaidy</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 mb-4 center">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <img src="{{S_image}}" alt="wrapkit" class="img-fluid rounded-circle" />
+                        </div>
+                        <div class="col-md-12 text-center">
+                            <div class="pt-2">
+                                <h5 class="mt-4 font-weight-medium mb-0">Surya Subrahmanya Sai Chandra Sekhar Kolli</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                </html>
+                {% endblock content %}

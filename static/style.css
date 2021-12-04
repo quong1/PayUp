@@ -1,3 +1,4 @@
+@import url(//fonts.googleapis.com/css?family=Montserrat:300,500);
 body {
   background: #fafafa;
   color: #333333;
@@ -41,6 +42,36 @@ h1, h2, h3, h4, h5, h6 {
 
 .account-heading {
   font-size: 2.5rem;
+}
+
+.image-section img{
+  height: 125px;
+  width: 125px;
+	float: right;
+}
+.PayUp {
+  font-family: "Montserrat", sans-serif;
+	color: #8d97ad;
+  font-weight: 300;
+}
+
+.imgcontainer {
+  position: relative;
+  margin: 0 auto;
+  padding: 0 3rem;
+  z-index: 10;
+  max-width: 81rem;
+  width: 100%;
+}
+
+.col-md-12 img{
+  width:  125px;
+  height: 125px;
+}
+
+.col-md-13 img{
+  width:  125px;
+  height: 125px;
 }
 
 .dollar{

@@ -248,6 +248,28 @@ class Budgetdb(db.Model):
 
 
 @app.route("/")
+def index():
+    payup_image = url_for("static", filename="image/Payup.png")
+    csv_image = url_for("static", filename="image/csv.jpg")
+    table_image = url_for("static", filename="image/table.png")
+    M_image = url_for("static", filename="image/M.jpg")
+    Z_image = url_for("static", filename="image/zi.png")
+    J_image = url_for("static", filename="image/j.png")
+    S_image = url_for("static", filename="image/default.png")
+
+    return render_template(
+        "about.html",
+        payup_image=payup_image,
+        csv_image=csv_image,
+        table_image=table_image,
+        M_image=M_image,
+        Z_image=Z_image,
+        J_image=J_image,
+        S_image=S_image,
+        title="About",
+    )
+
+
 @app.route("/home", methods=["GET", "POST"])
 def home():
     """
@@ -277,6 +299,29 @@ def home():
             user_id=user_id,
         )
     return redirect(url_for("login"))
+
+
+@app.route("/about")
+def about():
+    payup_image = url_for("static", filename="image/Payup.png")
+    csv_image = url_for("static", filename="image/csv.jpg")
+    table_image = url_for("static", filename="image/table.png")
+    M_image = url_for("static", filename="image/M.jpg")
+    Z_image = url_for("static", filename="image/zi.png")
+    J_image = url_for("static", filename="image/j.png")
+    S_image = url_for("static", filename="image/default.png")
+
+    return render_template(
+        "about.html",
+        payup_image=payup_image,
+        csv_image=csv_image,
+        table_image=table_image,
+        M_image=M_image,
+        Z_image=Z_image,
+        J_image=J_image,
+        S_image=S_image,
+        title="About",
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
