@@ -5,8 +5,8 @@
 ## Introduction
 Signup to track your expenses. Login anytime to add or remove your budget and expenses.
 
-![image](https://user-images.githubusercontent.com/74800828/142094143-343f18f8-d71e-43a2-9ba4-b259351ad6b6.png)
-![image](https://user-images.githubusercontent.com/74800828/142093551-70f251dd-642b-4372-9fd9-fac53db957b4.png)
+![image](https://user-images.githubusercontent.com/89946346/144693501-80aaeec4-3f3a-43a5-a4c8-3ef908506f60.png)
+![image](https://user-images.githubusercontent.com/89946346/144693511-ade995ec-7917-4c37-8b4b-cfbe4a9fa07e.png)
 
 ## Setup Instruction
 - To run the project clone it into local directory create a ```.env``` file containing below mentioned parameters
