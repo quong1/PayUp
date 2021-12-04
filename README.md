@@ -29,6 +29,7 @@ python_dotenv
 flask_sqlalchemy
 psycopg2-binary
 base
+sqlalchemy
 ```
 
 ## To run the app
