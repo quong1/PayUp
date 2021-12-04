@@ -30,13 +30,13 @@
             </tr>
             <tr>
                 {% if budget %}
-                <td style="color :green">{{ "%.2f"|format(budget.budget) }}</td>
+                <td style="color :green">${{ "%.2f"|format(budget.budget) }}</td>
                 {% else %}
-                <td style="color :green">{{ "%.2f"|format(0.00) }}</td>
+                <td style="color :green">${{ "%.2f"|format(0.00) }}</td>
                 {% endif %}
-                <td style="color:red">{{ "%.2f"|format(used) }}</td>
+                <td style="color:red">${{ "%.2f"|format(used) }}</td>
                 {% if budget %}
-                <td>{{ "%.2f"|format(budget.budget - used) }}</td>
+                <td>${{ "%.2f"|format(budget.budget - used) }}</td>
                 {% endif %}
             </tr>
         </table>
@@ -87,7 +87,7 @@
                 <tr>
                     {% if expense %}
                     <td>{{ expense.expense }}</td>
-                    <td>{{ "%.2f"|format(expense.price) }}</td>
+                    <td>${{ "%.2f"|format(expense.price) }}</td>
                     {% endif %}
                     <td>
                         <form method="POST" action="{{ url_for('delete', expense_id=expense.id) }}">
