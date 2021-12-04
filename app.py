@@ -286,6 +286,9 @@ def home():
         form = ExpensesForm()
         expenses = Expensedb.query.filter_by(user_id=user_id).all()
         used = sum(map(lambda x: x.price, expenses))
+        image_file = url_for(
+            "static", filename="profile_pics/" + current_user.image_file
+        )
         budget = (
             Budgetdb.query.order_by(Budgetdb.id.desc())
             .filter_by(user_id=user_id)
@@ -299,6 +302,7 @@ def home():
             used=used,
             form=form,
             user_id=user_id,
+            image_file=image_file,
         )
     return redirect(url_for("login"))
 
